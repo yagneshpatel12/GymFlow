@@ -179,4 +179,38 @@
   .animate-slow-zoom {
     animation: slow-zoom 9s ease-in-out infinite alternate;
   }
+
+  /* Infinite testimonial marquee (two rows, opposite directions) */
+  @keyframes marquee-left {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  @keyframes marquee-right {
+    from {
+      transform: translateX(-50%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+  .animate-marquee-left {
+    animation: marquee-left var(--marquee-duration, 46s) linear infinite;
+  }
+  .animate-marquee-right {
+    animation: marquee-right var(--marquee-duration, 46s) linear infinite;
+  }
+  /* Pause the row while a visitor is reading it */
+  .marquee-row:hover .marquee-track {
+    animation-play-state: paused;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .animate-marquee-left,
+    .animate-marquee-right {
+      animation: none;
+    }
+  }
 }

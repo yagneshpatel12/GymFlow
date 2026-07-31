@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Hero } from "@/components/marketing/hero";
 import { Pricing } from "@/components/marketing/pricing";
+import { Testimonials } from "@/components/marketing/testimonials";
 
 const FEATURES = [
   {
@@ -152,31 +153,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Testimonial */}
-      <section className="py-20 sm:py-28">
-        <div className="mx-auto max-w-3xl px-4 text-center sm:px-6">
-          <div className="mb-6 flex justify-center gap-1 text-amber-400">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <svg key={i} viewBox="0 0 20 20" className="h-6 w-6 fill-current">
-                <path d="M10 1.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L10 15l-5.2 2.6 1-5.8L1.5 7.7l5.9-.9z" />
-              </svg>
-            ))}
-          </div>
-          <blockquote className="text-balance text-2xl font-medium leading-snug text-slate-900 sm:text-3xl">
-            “GymFlow replaced three tools and a spreadsheet. Check-ins, classes
-            and billing finally live in one place - our front desk runs itself.”
-          </blockquote>
-          <div className="mt-6 flex items-center justify-center gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-full bg-brand-100 font-semibold text-brand-700">
-              JD
-            </span>
-            <div className="text-left">
-              <div className="font-semibold text-slate-900">Jordan Diaz</div>
-              <div className="text-sm text-slate-500">Owner, Ironworks Fitness</div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <Testimonials />
 
       <Pricing />
 
