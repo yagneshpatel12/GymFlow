@@ -178,6 +178,9 @@ export default function SignupPage() {
         </span>
         <ArrowRight className="h-4 w-4 shrink-0 text-brand-600 transition-transform group-hover:translate-x-0.5" />
       </button>
+      <p className="mt-2 text-center text-xs font-medium text-brand-600">
+        👆 Reviewing this project? Start here
+      </p>
     </div>
   );
 }
