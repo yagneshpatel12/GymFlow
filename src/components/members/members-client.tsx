@@ -160,11 +160,11 @@ export function MembersClient({
         <table className="w-full min-w-[720px] text-left text-sm">
           <thead>
             <tr className="border-b border-slate-100 text-xs uppercase tracking-wide text-slate-400">
-              <th className="px-5 py-3 font-medium">Member</th>
-              <th className="px-5 py-3 font-medium">Plan</th>
-              <th className="px-5 py-3 font-medium">Status</th>
-              <th className="px-5 py-3 font-medium">Joined</th>
-              <th className="px-5 py-3 font-medium">Last visit</th>
+              <th className="whitespace-nowrap px-5 py-3 font-medium">Member</th>
+              <th className="whitespace-nowrap px-5 py-3 font-medium">Plan</th>
+              <th className="whitespace-nowrap px-5 py-3 font-medium">Status</th>
+              <th className="whitespace-nowrap px-5 py-3 font-medium">Joined</th>
+              <th className="whitespace-nowrap px-5 py-3 font-medium">Last visit</th>
               <th className="w-12 px-5 py-3" />
             </tr>
           </thead>
@@ -186,16 +186,16 @@ export function MembersClient({
                     </div>
                   </div>
                 </td>
-                <td className="px-5 py-3">
+                <td className="whitespace-nowrap px-5 py-3">
                   <Badge tone="neutral">{m.planName}</Badge>
                 </td>
-                <td className="px-5 py-3">
+                <td className="whitespace-nowrap px-5 py-3">
                   <StatusBadge status={m.status} />
                 </td>
-                <td className="px-5 py-3 text-slate-600">
+                <td className="whitespace-nowrap px-5 py-3 text-slate-600">
                   {format(new Date(m.joinDate), "MMM d, yyyy")}
                 </td>
-                <td className="px-5 py-3 text-slate-600">
+                <td className="whitespace-nowrap px-5 py-3 text-slate-600">
                   {m.lastVisit
                     ? formatDistanceToNow(new Date(m.lastVisit), { addSuffix: true })
                     : "-"}

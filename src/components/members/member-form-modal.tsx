@@ -188,10 +188,10 @@ export function MemberFormModal({
               <img
                 src={photoData}
                 alt="New member"
-                className="h-16 w-16 rounded-full object-cover shadow ring-2 ring-white"
+                className="h-16 w-16 shrink-0 rounded-full object-cover shadow ring-2 ring-white"
               />
             ) : (
-              <span className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+              <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-400">
                 <ImagePlus className="h-6 w-6" />
               </span>
             )}
