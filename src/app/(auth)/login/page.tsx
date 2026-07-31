@@ -5,18 +5,37 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input, Label } from "@/components/ui/input";
+import { Input, Label, FieldError } from "@/components/ui/input";
+import { validateForm } from "@/lib/form";
+import { loginInput } from "@/lib/validation";
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState<null | "login" | "demo">(null);
+
+  const clearFieldError = (k: string) =>
+    setFieldErrors((prev) => {
+      if (!prev[k]) return prev;
+      const next = { ...prev };
+      delete next[k];
+      return next;
+    });
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+
+    const check = validateForm(loginInput, { email, password });
+    if (!check.ok) {
+      setFieldErrors(check.errors);
+      return;
+    }
+    setFieldErrors({});
+
     setLoading("login");
     try {
       const res = await fetch("/api/auth/login", {
@@ -58,7 +77,7 @@ export default function LoginPage() {
         Log in to manage your gym.
       </p>
 
-      <form onSubmit={submit} className="mt-6 space-y-4">
+      <form onSubmit={submit} className="mt-6 space-y-4" noValidate>
         <div>
           <Label htmlFor="email">Email</Label>
           <Input
@@ -67,24 +86,29 @@ export default function LoginPage() {
             autoComplete="email"
             placeholder="you@gym.com"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
+            onChange={(e) => {
+              setEmail(e.target.value);
+              clearFieldError("email");
+            }}
+            aria-invalid={!!fieldErrors.email}
           />
+          <FieldError>{fieldErrors.email}</FieldError>
         </div>
         <div>
-          <div className="flex items-center justify-between">
-            <Label htmlFor="password">Password</Label>
-            <span className="mb-1.5 text-xs text-slate-400">Forgot?</span>
-          </div>
+          <Label htmlFor="password">Password</Label>
           <Input
             id="password"
             type="password"
             autoComplete="current-password"
             placeholder="••••••••"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
+            onChange={(e) => {
+              setPassword(e.target.value);
+              clearFieldError("password");
+            }}
+            aria-invalid={!!fieldErrors.password}
           />
+          <FieldError>{fieldErrors.password}</FieldError>
         </div>
 
         {error && (

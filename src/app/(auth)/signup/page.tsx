@@ -5,7 +5,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input, Label } from "@/components/ui/input";
+import { Input, Label, FieldError } from "@/components/ui/input";
+import { validateForm } from "@/lib/form";
+import { signupInput } from "@/lib/validation";
 
 const PERKS = [
   "Fully populated starter data - never a blank screen",
@@ -22,14 +24,31 @@ export default function SignupPage() {
     password: "",
   });
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
-  const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
+  const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm((f) => ({ ...f, [k]: e.target.value }));
+    // Clear a field's error as soon as the user edits it.
+    setFieldErrors((prev) => {
+      if (!prev[k]) return prev;
+      const next = { ...prev };
+      delete next[k];
+      return next;
+    });
+  };
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+
+    const check = validateForm(signupInput, form);
+    if (!check.ok) {
+      setFieldErrors(check.errors);
+      return;
+    }
+    setFieldErrors({});
+
     setLoading(true);
     try {
       const res = await fetch("/api/auth/signup", {
@@ -68,24 +87,28 @@ export default function SignupPage() {
         ))}
       </ul>
 
-      <form onSubmit={submit} className="mt-6 space-y-4">
+      <form onSubmit={submit} className="mt-6 space-y-4" noValidate>
         <div className="grid grid-cols-2 gap-3">
           <div>
             <Label htmlFor="name">Your name</Label>
-            <Input id="name" value={form.name} onChange={set("name")} placeholder="Alex Morgan" required />
+            <Input id="name" value={form.name} onChange={set("name")} placeholder="Alex Morgan" aria-invalid={!!fieldErrors.name} />
+            <FieldError>{fieldErrors.name}</FieldError>
           </div>
           <div>
             <Label htmlFor="gymName">Gym name</Label>
-            <Input id="gymName" value={form.gymName} onChange={set("gymName")} placeholder="Ironworks Fitness" required />
+            <Input id="gymName" value={form.gymName} onChange={set("gymName")} placeholder="Ironworks Fitness" aria-invalid={!!fieldErrors.gymName} />
+            <FieldError>{fieldErrors.gymName}</FieldError>
           </div>
         </div>
         <div>
           <Label htmlFor="email">Work email</Label>
-          <Input id="email" type="email" autoComplete="email" value={form.email} onChange={set("email")} placeholder="you@gym.com" required />
+          <Input id="email" type="email" autoComplete="email" value={form.email} onChange={set("email")} placeholder="you@gym.com" aria-invalid={!!fieldErrors.email} />
+          <FieldError>{fieldErrors.email}</FieldError>
         </div>
         <div>
           <Label htmlFor="password">Password</Label>
-          <Input id="password" type="password" autoComplete="new-password" value={form.password} onChange={set("password")} placeholder="At least 6 characters" required />
+          <Input id="password" type="password" autoComplete="new-password" value={form.password} onChange={set("password")} placeholder="At least 6 characters" aria-invalid={!!fieldErrors.password} />
+          <FieldError>{fieldErrors.password}</FieldError>
         </div>
 
         {error && (

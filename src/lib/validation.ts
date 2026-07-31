@@ -7,6 +7,22 @@ import {
   TRAINER_STATUSES,
 } from "@/lib/types";
 
+export const signupInput = z.object({
+  name: z.string().trim().min(2, "Please enter your name"),
+  gymName: z.string().trim().min(2, "Enter your gym's name"),
+  email: z.string().trim().toLowerCase().email("Enter a valid email"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+export type SignupInput = z.infer<typeof signupInput>;
+
+export const loginInput = z.object({
+  email: z.string().trim().toLowerCase().email("Enter a valid email"),
+  password: z.string().min(1, "Enter your password"),
+});
+
+export type LoginInput = z.infer<typeof loginInput>;
+
 export const memberInput = z.object({
   name: z.string().trim().min(2, "Name is required"),
   email: z.string().trim().toLowerCase().email("Enter a valid email"),

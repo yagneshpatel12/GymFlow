@@ -1,22 +1,15 @@
-import { z } from "zod";
 import { connectDB } from "@/lib/db";
 import { User } from "@/models/User";
 import { seedOwner } from "@/lib/seed";
 import { createSession, hashPassword } from "@/lib/auth";
 import { handle, ok, fail } from "@/lib/http";
+import { signupInput } from "@/lib/validation";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-const schema = z.object({
-  name: z.string().trim().min(2, "Please enter your name"),
-  email: z.string().trim().toLowerCase().email("Enter a valid email"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  gymName: z.string().trim().min(2, "Enter your gym's name"),
-});
-
 export const POST = handle(async (req) => {
-  const body = schema.parse(await req.json());
+  const body = signupInput.parse(await req.json());
   await connectDB();
 
   const exists = await User.findOne({ email: body.email }).lean();
