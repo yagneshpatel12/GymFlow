@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ArrowRight, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input, Label, FieldError } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { validateForm } from "@/lib/form";
 import { loginInput } from "@/lib/validation";
 
@@ -96,9 +97,8 @@ export default function LoginPage() {
         </div>
         <div>
           <Label htmlFor="password">Password</Label>
-          <Input
+          <PasswordInput
             id="password"
-            type="password"
             autoComplete="current-password"
             placeholder="••••••••"
             value={password}

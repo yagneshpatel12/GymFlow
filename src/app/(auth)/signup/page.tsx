@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input, Label, FieldError } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { validateForm } from "@/lib/form";
 import { signupInput } from "@/lib/validation";
 
@@ -107,7 +108,7 @@ export default function SignupPage() {
         </div>
         <div>
           <Label htmlFor="password">Password</Label>
-          <Input id="password" type="password" autoComplete="new-password" value={form.password} onChange={set("password")} placeholder="At least 6 characters" aria-invalid={!!fieldErrors.password} />
+          <PasswordInput id="password" autoComplete="new-password" value={form.password} onChange={set("password")} placeholder="At least 6 characters" aria-invalid={!!fieldErrors.password} />
           <FieldError>{fieldErrors.password}</FieldError>
         </div>
 
