@@ -7,7 +7,7 @@ billing and analytics - plus a premium marketing site that sells the product.
 > **Portfolio project** by [Yagnesh Patel](https://yagneshpateldev.com) -
 > a full-stack proof-of-work demonstrating end-to-end product engineering.
 
-**Live demo:** _(add your deployment URL)_ · **One-click demo login:**
+**Live demo:** [getgymflow.vercel.app](https://getgymflow.vercel.app/) · **One-click demo login:**
 `demo@gymflow.app` / `demo1234` (or hit **View demo dashboard** on the login page).
 
 ---
