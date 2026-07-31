@@ -1,12 +1,10 @@
 import { connectDB } from "@/lib/db";
 import { User } from "@/models/User";
-import { seedOwner } from "@/lib/seed";
 import { createSession, hashPassword } from "@/lib/auth";
 import { handle, ok, fail } from "@/lib/http";
 import { signupInput } from "@/lib/validation";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
 
 export const POST = handle(async (req) => {
   const body = signupInput.parse(await req.json());
@@ -25,9 +23,7 @@ export const POST = handle(async (req) => {
     isDemo: false,
   });
 
-  // Give new gyms a populated starter dataset so nothing looks empty.
-  await seedOwner(String(user._id), { members: 45, attendanceDays: 45 });
-
+  // New gyms start empty - owners populate their own members, classes, and plans.
   await createSession({
     id: String(user._id),
     email: user.email,

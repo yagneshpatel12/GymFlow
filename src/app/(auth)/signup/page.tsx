@@ -10,7 +10,7 @@ import { validateForm } from "@/lib/form";
 import { signupInput } from "@/lib/validation";
 
 const PERKS = [
-  "Fully populated starter data - never a blank screen",
+  "Your own gym, ready in seconds - add members and go",
   "Unlimited members & classes on the free trial",
   "No credit card required",
 ];
@@ -72,8 +72,8 @@ export default function SignupPage() {
         Start running your gym on GymFlow
       </h1>
       <p className="mt-1.5 text-sm text-slate-500">
-        Create your account - we&apos;ll set up a sample gym so you can explore
-        right away.
+        Create your account and start adding members, classes, and plans right
+        away.
       </p>
 
       <ul className="mt-5 space-y-2">
