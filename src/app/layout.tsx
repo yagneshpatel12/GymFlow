@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://gymflow.app"),
+  metadataBase: new URL("https://getgymflow.vercel.app"),
   title: {
     default: "GymFlow - Gym Management Software That Runs Itself",
     template: "%s · GymFlow",
