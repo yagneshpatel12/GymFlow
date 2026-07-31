@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Check, Loader2 } from "lucide-react";
+import { ArrowRight, Check, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input, Label, FieldError } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
@@ -26,7 +26,7 @@ export default function SignupPage() {
   });
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<null | "signup" | "demo">(null);
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm((f) => ({ ...f, [k]: e.target.value }));
@@ -50,7 +50,7 @@ export default function SignupPage() {
     }
     setFieldErrors({});
 
-    setLoading(true);
+    setLoading("signup");
     try {
       const res = await fetch("/api/auth/signup", {
         method: "POST",
@@ -63,7 +63,22 @@ export default function SignupPage() {
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Sign up failed");
-      setLoading(false);
+      setLoading(null);
+    }
+  }
+
+  async function demoLogin() {
+    setError(null);
+    setLoading("demo");
+    try {
+      const res = await fetch("/api/auth/demo", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Could not start demo");
+      router.push("/dashboard");
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not start demo");
+      setLoading(null);
     }
   }
 
@@ -118,8 +133,12 @@ export default function SignupPage() {
           </p>
         )}
 
-        <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create account"}
+        <Button type="submit" className="w-full" disabled={loading !== null}>
+          {loading === "signup" ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            "Create account"
+          )}
         </Button>
       </form>
 
@@ -129,6 +148,36 @@ export default function SignupPage() {
           Log in
         </Link>
       </p>
+
+      <div className="my-5 flex items-center gap-4">
+        <div className="h-px flex-1 bg-slate-200" />
+        <span className="text-xs font-medium text-slate-400">or</span>
+        <div className="h-px flex-1 bg-slate-200" />
+      </div>
+
+      <button
+        type="button"
+        onClick={demoLogin}
+        disabled={loading !== null}
+        className="group flex w-full items-center gap-3 rounded-xl border border-brand-200 bg-brand-50 p-2.5 text-left transition-all hover:border-brand-300 hover:bg-brand-100 hover:shadow-sm disabled:opacity-70"
+      >
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-600 text-white shadow-brand">
+          {loading === "demo" ? (
+            <Loader2 className="h-5 w-5 animate-spin" />
+          ) : (
+            <Sparkles className="h-5 w-5" />
+          )}
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-semibold text-slate-900">
+            {loading === "demo" ? "Loading demo…" : "View demo dashboard"}
+          </span>
+          <span className="block text-xs text-slate-500">
+            No signup - explore a live, fully-loaded gym
+          </span>
+        </span>
+        <ArrowRight className="h-4 w-4 shrink-0 text-brand-600 transition-transform group-hover:translate-x-0.5" />
+      </button>
     </div>
   );
 }
