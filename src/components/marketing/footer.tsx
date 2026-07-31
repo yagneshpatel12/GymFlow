@@ -22,7 +22,6 @@ const COLS = [
     title: "Company",
     links: [
       { label: "Contact", href: "https://yagneshpateldev.com", external: true },
-      { label: "Privacy", href: "#" },
     ],
   },
 ];
