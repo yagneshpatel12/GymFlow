@@ -16,6 +16,7 @@ import {
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/members/status-badge";
+import { useToast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 import { ATTENDANCE_METHODS, type AttendanceMethod } from "@/lib/types";
 import type { CheckinMember, RecentCheckin } from "@/lib/data/attendance";
@@ -38,6 +39,7 @@ export function AttendanceClient({
   recent: RecentCheckin[];
 }) {
   const router = useRouter();
+  const toast = useToast();
   const [query, setQuery] = useState("");
   const [method, setMethod] = useState<AttendanceMethod>("manual");
   const [recent, setRecent] = useState(initialRecent);
@@ -69,7 +71,10 @@ export function AttendanceClient({
         setJustChecked(m.id);
         setQuery("");
         setTimeout(() => setJustChecked(null), 2200);
+        toast.success("Checked in", `${m.name} was checked in.`);
         router.refresh();
+      } else {
+        toast.error("Check-in failed", data.error ?? "Please try again.");
       }
     } finally {
       setPendingId(null);
@@ -77,8 +82,13 @@ export function AttendanceClient({
   }
 
   async function undo(id: string) {
+    const entry = recent.find((c) => c.id === id);
     setRecent((r) => r.filter((c) => c.id !== id));
     await fetch(`/api/attendance/${id}`, { method: "DELETE" });
+    toast.success(
+      "Check-in removed",
+      entry ? `${entry.memberName}'s check-in was undone.` : undefined,
+    );
     router.refresh();
   }
 
@@ -172,12 +182,6 @@ export function AttendanceClient({
               </div>
             )}
           </div>
-
-          {justChecked && (
-            <div className="mt-3 flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700">
-              <Check className="h-4 w-4" /> Checked in successfully
-            </div>
-          )}
         </div>
       </div>
 

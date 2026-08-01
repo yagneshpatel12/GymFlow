@@ -1,5 +1,6 @@
 import { requireUser } from "@/lib/auth";
 import { DashboardShell } from "@/components/dashboard/shell";
+import { ToastProvider } from "@/components/ui/toast";
 
 export default async function DashboardLayout({
   children,
@@ -7,5 +8,9 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   const user = await requireUser();
-  return <DashboardShell user={user}>{children}</DashboardShell>;
+  return (
+    <ToastProvider>
+      <DashboardShell user={user}>{children}</DashboardShell>
+    </ToastProvider>
+  );
 }

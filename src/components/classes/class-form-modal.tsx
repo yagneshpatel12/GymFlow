@@ -6,6 +6,7 @@ import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { Input, Label, FieldError } from "@/components/ui/input";
 import { Dropdown } from "@/components/ui/dropdown";
+import { useToast } from "@/components/ui/toast";
 import { classInput } from "@/lib/validation";
 import { validateForm } from "@/lib/form";
 import {
@@ -70,6 +71,7 @@ export function ClassFormModal({
   defaultDay,
 }: Props) {
   const editing = Boolean(gymClass);
+  const toast = useToast();
   const [form, setForm] = useState(() => initial(gymClass, defaultDay));
   const [error, setError] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -125,10 +127,16 @@ export function ClassFormModal({
       );
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Could not save class");
+      toast.success(
+        editing ? "Class updated" : "Class added",
+        `${form.title} was saved to the schedule.`,
+      );
       onSaved();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not save class");
+      const message = err instanceof Error ? err.message : "Could not save class";
+      setError(message);
+      toast.error(editing ? "Could not update class" : "Could not add class", message);
     } finally {
       setSaving(false);
     }

@@ -9,6 +9,7 @@ import { Modal } from "@/components/ui/modal";
 import { Badge } from "@/components/ui/badge";
 import { Dropdown } from "@/components/ui/dropdown";
 import { ClassFormModal } from "@/components/classes/class-form-modal";
+import { useToast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 import {
   CLASS_TYPES,
@@ -93,6 +94,7 @@ export function SchedulerClient({
   trainers: TrainerOption[];
 }) {
   const router = useRouter();
+  const toast = useToast();
   const [typeFilter, setTypeFilter] = useState<ClassType | "all">("all");
   const [trainerFilter, setTrainerFilter] = useState<string>("all");
 
@@ -128,8 +130,15 @@ export function SchedulerClient({
   async function confirmDelete() {
     if (!deleteTarget) return;
     setDeleting(true);
+    const title = deleteTarget.title;
     try {
-      await fetch(`/api/classes/${deleteTarget.id}`, { method: "DELETE" });
+      const res = await fetch(`/api/classes/${deleteTarget.id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        toast.error("Could not delete class", data.error ?? "Please try again.");
+        return;
+      }
+      toast.success("Class deleted", `${title} was removed from the schedule.`);
       setDeleteTarget(null);
       setSelected(null);
       router.refresh();

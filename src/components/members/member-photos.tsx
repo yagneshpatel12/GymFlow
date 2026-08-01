@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 import { fileToResizedDataUrl } from "@/lib/image";
 
@@ -32,6 +33,7 @@ export function MemberPhotos({
   afterPhotoId: string | null;
 }) {
   const router = useRouter();
+  const toast = useToast();
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -40,15 +42,25 @@ export function MemberPhotos({
   async function onFiles(files: FileList | null) {
     if (!files?.length) return;
     setUploading(true);
+    let count = 0;
     try {
       for (const file of Array.from(files)) {
         if (!file.type.startsWith("image/")) continue;
         const data = await fileToResizedDataUrl(file);
-        await fetch(`/api/members/${memberId}/photos`, {
+        const res = await fetch(`/api/members/${memberId}/photos`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ data }),
         });
+        if (res.ok) count += 1;
+      }
+      if (count > 0) {
+        toast.success(
+          count === 1 ? "Photo uploaded" : `${count} photos uploaded`,
+          "Added to this member's progress photos.",
+        );
+      } else {
+        toast.error("Upload failed", "No photos could be uploaded. Please try again.");
       }
       router.refresh();
     } finally {
@@ -64,12 +76,20 @@ export function MemberPhotos({
   ) {
     setBusyId(photoId);
     setMenuId(null);
+    const label = { profile: "Profile", before: "Before", after: "After" }[role];
     try {
-      await fetch(`/api/members/${memberId}/photos`, {
+      const res = await fetch(`/api/members/${memberId}/photos`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ role, photoId: active ? null : photoId }),
       });
+      if (res.ok) {
+        toast.success(
+          active ? `${label} photo unset` : `${label} photo set`,
+        );
+      } else {
+        toast.error("Could not update photo", "Please try again.");
+      }
       router.refresh();
     } finally {
       setBusyId(null);
@@ -80,7 +100,12 @@ export function MemberPhotos({
     setBusyId(photoId);
     setMenuId(null);
     try {
-      await fetch(`/api/photos/${photoId}`, { method: "DELETE" });
+      const res = await fetch(`/api/photos/${photoId}`, { method: "DELETE" });
+      if (res.ok) {
+        toast.success("Photo deleted", "The photo was removed.");
+      } else {
+        toast.error("Could not delete photo", "Please try again.");
+      }
       router.refresh();
     } finally {
       setBusyId(null);

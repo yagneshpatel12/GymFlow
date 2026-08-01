@@ -6,7 +6,6 @@ import {
   CalendarDays,
   Loader2,
   Mail,
-  MoreHorizontal,
   Pencil,
   Phone,
   Plus,
@@ -19,6 +18,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { TrainerFormModal } from "@/components/trainers/trainer-form-modal";
+import { useToast } from "@/components/ui/toast";
+import { RowMenu } from "@/components/ui/row-menu";
 import { cn } from "@/lib/utils";
 import type { TrainerRow } from "@/lib/data/trainers";
 
@@ -31,17 +32,24 @@ const STATUS_LABEL = { active: "Active", off: "Off today", away: "Away" } as con
 
 export function TrainersClient({ trainers }: { trainers: TrainerRow[] }) {
   const router = useRouter();
+  const toast = useToast();
   const [addOpen, setAddOpen] = useState(false);
   const [editTrainer, setEditTrainer] = useState<TrainerRow | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<TrainerRow | null>(null);
   const [deleting, setDeleting] = useState(false);
-  const [menuId, setMenuId] = useState<string | null>(null);
 
   async function confirmDelete() {
     if (!deleteTarget) return;
     setDeleting(true);
+    const name = deleteTarget.name;
     try {
-      await fetch(`/api/trainers/${deleteTarget.id}`, { method: "DELETE" });
+      const res = await fetch(`/api/trainers/${deleteTarget.id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        toast.error("Could not remove trainer", data.error ?? "Please try again.");
+        return;
+      }
+      toast.success("Trainer removed", `${name} was removed from your team.`);
       setDeleteTarget(null);
       router.refresh();
     } finally {
@@ -83,38 +91,23 @@ export function TrainersClient({ trainers }: { trainers: TrainerRow[] }) {
                   <div className="text-sm text-slate-500">{t.title}</div>
                 </div>
               </div>
-              <div className="relative" onClick={(e) => e.stopPropagation()}>
-                <button
-                  onClick={() => setMenuId(menuId === t.id ? null : t.id)}
-                  className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-                >
-                  <MoreHorizontal className="h-4 w-4" />
-                </button>
-                {menuId === t.id && (
-                  <>
-                    <div className="fixed inset-0 z-10" onClick={() => setMenuId(null)} />
-                    <div className="absolute right-0 top-8 z-20 w-36 overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
-                      <button
-                        onClick={() => {
-                          setEditTrainer(t);
-                          setMenuId(null);
-                        }}
-                        className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
-                      >
-                        <Pencil className="h-4 w-4" /> Edit
-                      </button>
-                      <button
-                        onClick={() => {
-                          setDeleteTarget(t);
-                          setMenuId(null);
-                        }}
-                        className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-rose-600 hover:bg-rose-50"
-                      >
-                        <Trash2 className="h-4 w-4" /> Delete
-                      </button>
-                    </div>
-                  </>
-                )}
+              <div onClick={(e) => e.stopPropagation()}>
+                <RowMenu
+                  width={144}
+                  items={[
+                    {
+                      icon: Pencil,
+                      label: "Edit",
+                      onClick: () => setEditTrainer(t),
+                    },
+                    {
+                      icon: Trash2,
+                      label: "Delete",
+                      danger: true,
+                      onClick: () => setDeleteTarget(t),
+                    },
+                  ]}
+                />
               </div>
             </div>
 

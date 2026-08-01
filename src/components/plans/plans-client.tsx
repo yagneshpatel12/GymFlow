@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, Loader2, MoreHorizontal, Pencil, Plus, Star, Trash2, Users } from "lucide-react";
+import { Check, Loader2, Pencil, Plus, Star, Trash2, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { PlanFormModal } from "@/components/plans/plan-form-modal";
+import { useToast } from "@/components/ui/toast";
+import { RowMenu } from "@/components/ui/row-menu";
 import { cn, formatCurrency } from "@/lib/utils";
 import type { PlanRow } from "@/lib/data/plans";
 
@@ -24,12 +26,12 @@ const intervalLabel = (i: string) =>
 
 export function PlansClient({ plans }: { plans: PlanRow[] }) {
   const router = useRouter();
+  const toast = useToast();
   const [addOpen, setAddOpen] = useState(false);
   const [editPlan, setEditPlan] = useState<PlanRow | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<PlanRow | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
-  const [menuId, setMenuId] = useState<string | null>(null);
 
   async function confirmDelete() {
     if (!deleteTarget) return;
@@ -39,9 +41,12 @@ export function PlansClient({ plans }: { plans: PlanRow[] }) {
       const res = await fetch(`/api/plans/${deleteTarget.id}`, { method: "DELETE" });
       const data = await res.json();
       if (!res.ok) {
-        setDeleteError(data.error ?? "Could not delete plan");
+        const message = data.error ?? "Could not delete plan";
+        setDeleteError(message);
+        toast.error("Could not delete plan", message);
         return;
       }
+      toast.success("Plan deleted", `The ${deleteTarget.name} plan was removed.`);
       setDeleteTarget(null);
       router.refresh();
     } finally {
@@ -93,39 +98,26 @@ export function PlansClient({ plans }: { plans: PlanRow[] }) {
                     )}
                     {!p.isActive && <Badge tone="neutral">Inactive</Badge>}
                   </div>
-                  <div className="relative" onClick={(e) => e.stopPropagation()}>
-                    <button
-                      onClick={() => setMenuId(menuId === p.id ? null : p.id)}
-                      className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-                    >
-                      <MoreHorizontal className="h-4 w-4" />
-                    </button>
-                    {menuId === p.id && (
-                      <>
-                        <div className="fixed inset-0 z-10" onClick={() => setMenuId(null)} />
-                        <div className="absolute right-0 top-8 z-20 w-32 overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
-                          <button
-                            onClick={() => {
-                              setEditPlan(p);
-                              setMenuId(null);
-                            }}
-                            className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
-                          >
-                            <Pencil className="h-4 w-4" /> Edit
-                          </button>
-                          <button
-                            onClick={() => {
-                              setDeleteTarget(p);
-                              setDeleteError(null);
-                              setMenuId(null);
-                            }}
-                            className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-rose-600 hover:bg-rose-50"
-                          >
-                            <Trash2 className="h-4 w-4" /> Delete
-                          </button>
-                        </div>
-                      </>
-                    )}
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <RowMenu
+                      width={144}
+                      items={[
+                        {
+                          icon: Pencil,
+                          label: "Edit",
+                          onClick: () => setEditPlan(p),
+                        },
+                        {
+                          icon: Trash2,
+                          label: "Delete",
+                          danger: true,
+                          onClick: () => {
+                            setDeleteError(null);
+                            setDeleteTarget(p);
+                          },
+                        },
+                      ]}
+                    />
                   </div>
                 </div>
 

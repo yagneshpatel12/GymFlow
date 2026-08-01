@@ -6,6 +6,7 @@ import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { Input, Label, FieldError } from "@/components/ui/input";
 import { Dropdown } from "@/components/ui/dropdown";
+import { useToast } from "@/components/ui/toast";
 import { memberInput } from "@/lib/validation";
 import { validateForm } from "@/lib/form";
 import { fileToResizedDataUrl } from "@/lib/image";
@@ -55,6 +56,7 @@ export function MemberFormModal({
   member,
 }: Props) {
   const editing = Boolean(member);
+  const toast = useToast();
   const [form, setForm] = useState(() => initialForm(member, plans));
   const [error, setError] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -143,10 +145,18 @@ export function MemberFormModal({
         }
       }
 
+      toast.success(
+        editing ? "Member updated" : "Member added",
+        editing
+          ? `${form.name}'s details were saved.`
+          : `${form.name} is now on your roster.`,
+      );
       onSaved();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not save member");
+      const message = err instanceof Error ? err.message : "Could not save member";
+      setError(message);
+      toast.error(editing ? "Could not update member" : "Could not add member", message);
     } finally {
       setSaving(false);
     }

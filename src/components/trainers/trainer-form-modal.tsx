@@ -6,6 +6,7 @@ import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Textarea, FieldError } from "@/components/ui/input";
 import { Dropdown } from "@/components/ui/dropdown";
+import { useToast } from "@/components/ui/toast";
 import { trainerInput } from "@/lib/validation";
 import { validateForm } from "@/lib/form";
 import { TRAINER_STATUSES } from "@/lib/types";
@@ -42,6 +43,7 @@ export function TrainerFormModal({
   trainer?: TrainerRow | null;
 }) {
   const editing = Boolean(trainer);
+  const toast = useToast();
   const [form, setForm] = useState(() => initial(trainer));
   const [error, setError] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -100,10 +102,18 @@ export function TrainerFormModal({
       );
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Could not save trainer");
+      toast.success(
+        editing ? "Trainer updated" : "Trainer added",
+        editing
+          ? `${form.name}'s profile was saved.`
+          : `${form.name} was added to your team.`,
+      );
       onSaved();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not save trainer");
+      const message = err instanceof Error ? err.message : "Could not save trainer";
+      setError(message);
+      toast.error(editing ? "Could not update trainer" : "Could not add trainer", message);
     } finally {
       setSaving(false);
     }

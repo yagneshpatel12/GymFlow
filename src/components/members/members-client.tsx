@@ -7,7 +7,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Loader2,
-  MoreHorizontal,
   Pencil,
   Plus,
   Search,
@@ -21,6 +20,8 @@ import { Modal } from "@/components/ui/modal";
 import { Dropdown } from "@/components/ui/dropdown";
 import { StatusBadge } from "@/components/members/status-badge";
 import { MemberFormModal } from "@/components/members/member-form-modal";
+import { useToast } from "@/components/ui/toast";
+import { RowMenu } from "@/components/ui/row-menu";
 import { cn } from "@/lib/utils";
 import { MEMBER_STATUSES, MEMBER_STATUS_META, type MemberStatus } from "@/lib/types";
 import type { MemberRow, PlanOption, TrainerOption } from "@/lib/data/members";
@@ -39,11 +40,11 @@ export function MembersClient({
   stats: Record<string, number>;
 }) {
   const router = useRouter();
+  const toast = useToast();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<MemberStatus | "all">("all");
   const [planId, setPlanId] = useState<string>("all");
   const [page, setPage] = useState(1);
-  const [menuId, setMenuId] = useState<string | null>(null);
 
   const [addOpen, setAddOpen] = useState(false);
   const [editMember, setEditMember] = useState<MemberRow | null>(null);
@@ -80,8 +81,15 @@ export function MembersClient({
   async function confirmDelete() {
     if (!deleteTarget) return;
     setDeleting(true);
+    const name = deleteTarget.name;
     try {
-      await fetch(`/api/members/${deleteTarget.id}`, { method: "DELETE" });
+      const res = await fetch(`/api/members/${deleteTarget.id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        toast.error("Could not remove member", data.error ?? "Please try again.");
+        return;
+      }
+      toast.success("Member removed", `${name} was removed from your roster.`);
       setDeleteTarget(null);
       router.refresh();
     } finally {
@@ -201,46 +209,28 @@ export function MembersClient({
                     : "-"}
                 </td>
                 <td className="px-5 py-3" onClick={(e) => e.stopPropagation()}>
-                  <div className="relative flex justify-end">
-                    <button
-                      onClick={() => setMenuId(menuId === m.id ? null : m.id)}
-                      className="rounded-lg p-1.5 text-slate-400 opacity-0 transition-opacity hover:bg-slate-100 hover:text-slate-600 group-hover:opacity-100 data-[open=true]:opacity-100"
-                      data-open={menuId === m.id}
-                    >
-                      <MoreHorizontal className="h-4 w-4" />
-                    </button>
-                    {menuId === m.id && (
-                      <>
-                        <div
-                          className="fixed inset-0 z-10"
-                          onClick={() => setMenuId(null)}
-                        />
-                        <div className="absolute right-0 top-8 z-20 w-40 overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
-                          <MenuItem
-                            icon={UserRound}
-                            label="View profile"
-                            onClick={() => router.push(`/members/${m.id}`)}
-                          />
-                          <MenuItem
-                            icon={Pencil}
-                            label="Edit"
-                            onClick={() => {
-                              setEditMember(m);
-                              setMenuId(null);
-                            }}
-                          />
-                          <MenuItem
-                            icon={Trash2}
-                            label="Delete"
-                            danger
-                            onClick={() => {
-                              setDeleteTarget(m);
-                              setMenuId(null);
-                            }}
-                          />
-                        </div>
-                      </>
-                    )}
+                  <div className="flex justify-end">
+                    <RowMenu
+                      triggerClassName="opacity-0 group-hover:opacity-100 data-[open=true]:opacity-100"
+                      items={[
+                        {
+                          icon: UserRound,
+                          label: "View profile",
+                          onClick: () => router.push(`/members/${m.id}`),
+                        },
+                        {
+                          icon: Pencil,
+                          label: "Edit",
+                          onClick: () => setEditMember(m),
+                        },
+                        {
+                          icon: Trash2,
+                          label: "Delete",
+                          danger: true,
+                          onClick: () => setDeleteTarget(m),
+                        },
+                      ]}
+                    />
                   </div>
                 </td>
               </tr>
@@ -333,32 +323,5 @@ export function MembersClient({
         </p>
       </Modal>
     </div>
-  );
-}
-
-function MenuItem({
-  icon: Icon,
-  label,
-  onClick,
-  danger,
-}: {
-  icon: typeof Pencil;
-  label: string;
-  onClick: () => void;
-  danger?: boolean;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={cn(
-        "flex w-full items-center gap-2.5 px-3 py-2 text-sm transition-colors",
-        danger
-          ? "text-rose-600 hover:bg-rose-50"
-          : "text-slate-700 hover:bg-slate-50",
-      )}
-    >
-      <Icon className="h-4 w-4" />
-      {label}
-    </button>
   );
 }

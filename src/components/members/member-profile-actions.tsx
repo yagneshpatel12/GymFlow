@@ -6,6 +6,7 @@ import { Loader2, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { MemberFormModal } from "@/components/members/member-form-modal";
+import { useToast } from "@/components/ui/toast";
 import type { MemberProfile, MemberRow, PlanOption, TrainerOption } from "@/lib/data/members";
 
 export function MemberProfileActions({
@@ -18,6 +19,7 @@ export function MemberProfileActions({
   trainers: TrainerOption[];
 }) {
   const router = useRouter();
+  const toast = useToast();
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -46,7 +48,13 @@ export function MemberProfileActions({
   async function confirmDelete() {
     setDeleting(true);
     try {
-      await fetch(`/api/members/${member.id}`, { method: "DELETE" });
+      const res = await fetch(`/api/members/${member.id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        toast.error("Could not remove member", data.error ?? "Please try again.");
+        return;
+      }
+      toast.success("Member removed", `${member.name} was removed from your roster.`);
       router.push("/members");
       router.refresh();
     } finally {

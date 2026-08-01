@@ -6,6 +6,7 @@ import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Textarea, FieldError } from "@/components/ui/input";
 import { Dropdown } from "@/components/ui/dropdown";
+import { useToast } from "@/components/ui/toast";
 import { planInput } from "@/lib/validation";
 import { validateForm } from "@/lib/form";
 import { PLAN_INTERVALS } from "@/lib/types";
@@ -38,6 +39,7 @@ export function PlanFormModal({
   plan?: PlanRow | null;
 }) {
   const editing = Boolean(plan);
+  const toast = useToast();
   const [form, setForm] = useState(() => initial(plan));
   const [error, setError] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -90,10 +92,16 @@ export function PlanFormModal({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Could not save plan");
+      toast.success(
+        editing ? "Plan updated" : "Plan created",
+        `The ${form.name} plan was saved.`,
+      );
       onSaved();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not save plan");
+      const message = err instanceof Error ? err.message : "Could not save plan";
+      setError(message);
+      toast.error(editing ? "Could not update plan" : "Could not create plan", message);
     } finally {
       setSaving(false);
     }
